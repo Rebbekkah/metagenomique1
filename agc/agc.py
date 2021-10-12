@@ -83,17 +83,23 @@ def read_fasta(amplicon_file, minseqlen):
 			else :
 				seq += line.strip()
 
+		yield seq
+
 
 
 def dereplication_fulllength(amplicon_file, minseqlen, mincount):
-	r = read_fasta(amplicon_file, minseqlen)
+	#r = read_fasta(amplicon_file, minseqlen)
 	dico_occ = {}
 
-	for i in r :
-		if i not in dico_occ :
-			dico_occ[i] = 1
+	for seq in read_fasta(amplicon_file, minseqlen):
+		if seq not in dico_occ :
+			dico_occ[seq] = 1
 		else :
-			dico_occ[i] += 1
+			dico_occ[seq] += 1
+
+	for key,item in sorted(dico_occ.items(), key = lambda t:t[1], reverse = True) :
+		if item >= mincount :
+			yield [key, dico_occ[key]]
 
 
 
@@ -160,6 +166,11 @@ def main():
 	#for i in read :
 	#    print(i)
 	derep = dereplication_fulllength(args.amplicon_file, args.minseqlen, args.mincount )
+	#print(derep)
+	#for i in derep :
+	#	print(i)
+	abundance = abundance_greedy_clustering(args.amplicon_file, args.minseqlen, args.mincount, args.chunk_size, args.kmer_size)
+
 
 
 	# Votre programme ici
