@@ -34,116 +34,136 @@ __status__ = "Developpement"
 
 
 def isfile(path):
-    """Check if path is an existing file.
-      :Parameters:
-          path: Path to the file
-    """
-    if not os.path.isfile(path):
-        if os.path.isdir(path):
-            msg = "{0} is a directory".format(path)
-        else:
-            msg = "{0} does not exist.".format(path)
-        raise argparse.ArgumentTypeError(msg)
-    return path
+	"""Check if path is an existing file.
+	  :Parameters:
+		  path: Path to the file
+	"""
+	if not os.path.isfile(path):
+		if os.path.isdir(path):
+			msg = "{0} is a directory".format(path)
+		else:
+			msg = "{0} does not exist.".format(path)
+		raise argparse.ArgumentTypeError(msg)
+	return path
 
 
 def get_arguments():
-    """Retrieves the arguments of the program.
-      Returns: An object that contains the arguments
-    """
-    # Parsing arguments
-    parser = argparse.ArgumentParser(description=__doc__, usage=
-                                     "{0} -h"
-                                     .format(sys.argv[0]))
-    parser.add_argument('-i', '-amplicon_file', dest='amplicon_file', type=isfile, required=True, 
-                        help="Amplicon is a compressed fasta file (.fasta.gz)")
-    parser.add_argument('-s', '-minseqlen', dest='minseqlen', type=int, default = 400,
-                        help="Minimum sequence length for dereplication (default 400)")
-    parser.add_argument('-m', '-mincount', dest='mincount', type=int, default = 10,
-                        help="Minimum count for dereplication  (default 10)")
-    parser.add_argument('-c', '-chunk_size', dest='chunk_size', type=int, default = 100,
-                        help="Chunk size for dereplication  (default 100)")
-    parser.add_argument('-k', '-kmer_size', dest='kmer_size', type=int, default = 8,
-                        help="kmer size for dereplication  (default 10)")
-    parser.add_argument('-o', '-output_file', dest='output_file', type=str,
-                        default="OTU.fasta", help="Output file")
-    return parser.parse_args()
+	"""Retrieves the arguments of the program.
+	  Returns: An object that contains the arguments
+	"""
+	# Parsing arguments
+	parser = argparse.ArgumentParser(description=__doc__, usage=
+									 "{0} -h"
+									 .format(sys.argv[0]))
+	parser.add_argument('-i', '-amplicon_file', dest='amplicon_file', type=isfile, required=True, 
+						help="Amplicon is a compressed fasta file (.fasta.gz)")
+	parser.add_argument('-s', '-minseqlen', dest='minseqlen', type=int, default = 400,
+						help="Minimum sequence length for dereplication (default 400)")
+	parser.add_argument('-m', '-mincount', dest='mincount', type=int, default = 10,
+						help="Minimum count for dereplication  (default 10)")
+	parser.add_argument('-c', '-chunk_size', dest='chunk_size', type=int, default = 100,
+						help="Chunk size for dereplication  (default 100)")
+	parser.add_argument('-k', '-kmer_size', dest='kmer_size', type=int, default = 8,
+						help="kmer size for dereplication  (default 10)")
+	parser.add_argument('-o', '-output_file', dest='output_file', type=str,
+						default="OTU.fasta", help="Output file")
+	return parser.parse_args()
 
 def read_fasta(amplicon_file, minseqlen):
-    with open(amplicon_file, "r") as filin : 
-        lines = filin.readlines()
-        for i in range(2, len(lines), 2) :
-            if len(lines) < minseqlen :
-                continue
-            else :
-                yield lines[i].strip()
+	with gzip.open(amplicon_file, "rt") as filin :
+		seq = ""
+		for line in filin :
+			if line.startswith(">") :
+				if len(seq) > minseqlen :
+					yield seq
+				seq = ""
+				#seq.split()
+				#continue
+				#seq = line[1:].split()[0] 
+			else :
+				seq += line.strip()
+
 
 
 def dereplication_fulllength(amplicon_file, minseqlen, mincount):
-    pass
+	r = read_fasta(amplicon_file, minseqlen)
+	dico_occ = {}
+
+	for i in r :
+		if i not in dico_occ :
+			dico_occ[i] = 1
+		else :
+			dico_occ[i] += 1
+
+
+
 
 
 def get_unique(ids):
-    return {}.fromkeys(ids).keys()
+	return {}.fromkeys(ids).keys()
 
 
 def common(lst1, lst2): 
-    return list(set(lst1) & set(lst2))
+	return list(set(lst1) & set(lst2))
 
 
 def get_chunks(sequence, chunk_size):
-    """"""
-    len_seq = len(sequence)
-    if len_seq < chunk_size * 4:
-        raise ValueError("Sequence length ({}) is too short to be splitted in 4"
-                         " chunk of size {}".format(len_seq, chunk_size))
-    return [sequence[i:i+chunk_size] 
-              for i in range(0, len_seq, chunk_size) 
-                if i+chunk_size <= len_seq - 1]
+	""""""
+	len_seq = len(sequence)
+	if len_seq < chunk_size * 4:
+		raise ValueError("Sequence length ({}) is too short to be splitted in 4"
+						 " chunk of size {}".format(len_seq, chunk_size))
+	return [sequence[i:i+chunk_size] 
+			  for i in range(0, len_seq, chunk_size) 
+				if i+chunk_size <= len_seq - 1]
 
 
 def cut_kmer(sequence, kmer_size):
-    """Cut sequence into kmers"""
-    for i in range(0, len(sequence) - kmer_size + 1):
-        yield sequence[i:i+kmer_size]
+	"""Cut sequence into kmers"""
+	for i in range(0, len(sequence) - kmer_size + 1):
+		yield sequence[i:i+kmer_size]
 
 def get_identity(alignment_list):
-    """Prend en une liste de séquences alignées au format ["SE-QUENCE1", "SE-QUENCE2"]
-    Retourne le pourcentage d'identite entre les deux."""
-    id_nu = 0
-    for i in range(len(alignment_list[0])):
-        if alignment_list[0][i] == alignment_list[1][i]:
-            id_nu += 1
-    return round(100.0 * id_nu / len(alignment_list[0]), 2)
+	"""Prend en une liste de séquences alignées au format ["SE-QUENCE1", "SE-QUENCE2"]
+	Retourne le pourcentage d'identite entre les deux."""
+	id_nu = 0
+	for i in range(len(alignment_list[0])):
+		if alignment_list[0][i] == alignment_list[1][i]:
+			id_nu += 1
+	return round(100.0 * id_nu / len(alignment_list[0]), 2)
 
 def chimera_removal(amplicon_file, minseqlen, mincount, chunk_size, kmer_size):
-    pass
+	pass
 
 def abundance_greedy_clustering(amplicon_file, minseqlen, mincount, chunk_size, kmer_size):
-    pass
+	pass
 
 def fill(text, width=80):
-    """Split text with a line return to respect fasta format"""
-    return os.linesep.join(text[i:i+width] for i in range(0, len(text), width))
+	"""Split text with a line return to respect fasta format"""
+	return os.linesep.join(text[i:i+width] for i in range(0, len(text), width))
 
 def write_OTU(OTU_list, output_file):
-    pass
+	pass
 
 #==============================================================
 # Main program
 #==============================================================
 def main():
-    """
-    Main program function
-    """
-    # Get arguments
-    args = get_arguments()
+	"""
+	Main program function
+	"""
+	# Get arguments
+	args = get_arguments()
 
-    read = read_fasta(args.amplicon_file, args.minseqlen)
+	read = read_fasta(args.amplicon_file, args.minseqlen)
+	#print(read)
+	#for i in read :
+	#    print(i)
+	derep = dereplication_fulllength(args.amplicon_file, args.minseqlen, args.mincount )
 
 
-    # Votre programme ici
+	# Votre programme ici
 
 
 if __name__ == '__main__':
-    main()
+	main()
