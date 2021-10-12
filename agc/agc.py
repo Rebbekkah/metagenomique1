@@ -70,7 +70,13 @@ def get_arguments():
     return parser.parse_args()
 
 def read_fasta(amplicon_file, minseqlen):
-    pass
+    with open(amplicon_file, "r") as filin : 
+        lines = filin.readlines()
+        for i in range(2, len(lines), 2) :
+            if len(lines) < minseqlen :
+                continue
+            else :
+                yield lines[i].strip()
 
 
 def dereplication_fulllength(amplicon_file, minseqlen, mincount):
@@ -132,6 +138,10 @@ def main():
     """
     # Get arguments
     args = get_arguments()
+
+    read = read_fasta(args.amplicon_file, args.minseqlen)
+
+
     # Votre programme ici
 
 
