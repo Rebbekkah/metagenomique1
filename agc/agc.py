@@ -142,7 +142,24 @@ def chimera_removal(amplicon_file, minseqlen, mincount, chunk_size, kmer_size):
 	pass
 
 def abundance_greedy_clustering(amplicon_file, minseqlen, mincount, chunk_size, kmer_size):
-	pass
+	sequence = list(dereplication_fulllength(amplicon_file, minseqlen, mincount))
+	dico_otu = {}
+	for seq in sequence :
+		otu = sequence[seq][seq]
+		al = nw.global_align(otu, sequence[seq], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
+		pcent = get_identity(al)
+
+		if (pcent > 0.97) :
+			if otu not in dico_otu :
+				dico_otu[otu] = 1
+			else :
+				dico_otu[otu] += 1
+
+		yield [dico_otu, dico_otu[seq]]
+
+	
+
+
 
 def fill(text, width=80):
 	"""Split text with a line return to respect fasta format"""
@@ -170,7 +187,8 @@ def main():
 	#for i in derep :
 	#	print(i)
 	abundance = abundance_greedy_clustering(args.amplicon_file, args.minseqlen, args.mincount, args.chunk_size, args.kmer_size)
-
+	for i in abundance :
+		print(i)
 
 
 	# Votre programme ici
