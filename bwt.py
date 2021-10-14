@@ -34,13 +34,16 @@ def find_original(sequence, bwt_seq) :
     for index, letter in enumerate(col_1):
         if letter not in dico_col1 :
             dico_col1[letter] = index
-        elif letter not in bwt_seq :
-            P.append(bwt_seq[])
-        elif :
-            P[index] += 1
+ 
+        if bwt_seq[index]  not in bwt_seq[:index] :
+            P.append(0)
+        #elif bwt_seq[index] in bwt_seq[:index] :
+        else :
+            #P.append(bwt_seq[:index].count(letter))
+    
+            P.append(bwt_seq[:index].count(bwt_seq[index]))
 
-    print(P)    
-    print(dico_col1)
+    return P,dico_col1 
 '''
 def posbwt(bwtseq, N, P) :
     i = len(seq) - 1
@@ -71,7 +74,6 @@ if __name__ == "__main__" :
     perm = permutation(seq)
     #print(perm)
     bwt_seq = bwt(perm)
-    #print(bwt_seq)
-    origin = find_original(perm, bwt_seq)
-    print(origin)
     print("Original is {} and bwt is {}".format(seq, bwt_seq))
+    #print(bwt_seq)
+    P_list, dico_1 = find_original(perm, bwt_seq)
