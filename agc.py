@@ -144,25 +144,22 @@ def chimera_removal(amplicon_file, minseqlen, mincount, chunk_size, kmer_size):
 def abundance_greedy_clustering(amplicon_file, minseqlen, mincount, chunk_size, kmer_size):
 	sequence = list(dereplication_fulllength(amplicon_file, minseqlen, mincount))
 	#print(sequence)
-	dico_otu = {}
-	otu = []
+	#dico_otu = {}
+	otu_list = [sequence[0]]
+	#print(otu)
 	#otu = sequence[0][0]
-	for seq in range(len(sequence)-1) :
+	for i in range(1,len(sequence)) :
 		#print(sequence[seq][1])
-		otu.append(sequence[seq][0])
+		#otu.append(sequence[seq][0])
 		#print(otu)
-		for i in otu :
-			al = nw.global_align(otu, sequence[seq+1][0], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
-			#pcent = get_identity(al)
-
+		for seq_otu in otu_list :
+			#print(seq_otu[0])
+			#print(sequence[i][0])
+			al = nw.global_align(seq_otu[0], sequence[i][0], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
 			pcent = get_identity(al)
-			#print(pcent)
 			if (pcent < 97) :
-				dico_otu[sequence[seq]] = sequence[seq][1]
-			else :
-				continue
-	print(dico_otu)
-	yield dico_otu
+				otu_list.append(sequence[i])
+	print(otu_list)
 
 
 
