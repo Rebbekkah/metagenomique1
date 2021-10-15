@@ -145,20 +145,22 @@ def abundance_greedy_clustering(amplicon_file, minseqlen, mincount, chunk_size, 
 	sequence = list(dereplication_fulllength(amplicon_file, minseqlen, mincount))
 	#print(sequence)
 	dico_otu = {}
+	otu = []
 	#otu = sequence[0][0]
 	for seq in range(len(sequence)-1) :
 		#print(sequence[seq][1])
-		otu = sequence[seq][0]
+		otu.append(sequence[seq][0])
 		#print(otu)
-		al = nw.global_align(otu, sequence[seq+1][0], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
-		#pcent = get_identity(al)
+		for i in otu :
+			al = nw.global_align(otu, sequence[seq+1][0], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
+			#pcent = get_identity(al)
 
-		pcent = get_identity(al)
-		#print(pcent)
-		if (pcent < 97) :
-			dico_otu[sequence[seq]] = sequence[seq][1]
-		else :
-			continue
+			pcent = get_identity(al)
+			#print(pcent)
+			if (pcent < 97) :
+				dico_otu[sequence[seq]] = sequence[seq][1]
+			else :
+				continue
 	print(dico_otu)
 	yield dico_otu
 
