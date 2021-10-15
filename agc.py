@@ -23,13 +23,13 @@ from collections import Counter
 # ftp://ftp.ncbi.nih.gov/blast/matrices/
 import nwalign3 as nw
 
-__author__ = "Your Name"
+__author__ = "Goulancourt Rebecca & Théo Jamay"
 __copyright__ = "Universite Paris Diderot"
-__credits__ = ["Your Name"]
+__credits__ = ["Goulancourt Rebecca & Théo Jamay"]
 __license__ = "GPL"
 __version__ = "1.0.0"
-__maintainer__ = "Your Name"
-__email__ = "your@email.fr"
+__maintainer__ = "Goulancourt Rebecca & Théo Jamay"
+__email__ = "rgoulancourt@yahoo.com & jamay.theo@gmail.com"
 __status__ = "Developpement"
 
 
@@ -99,7 +99,7 @@ def dereplication_fulllength(amplicon_file, minseqlen, mincount):
 
 	for key,item in sorted(dico_occ.items(), key = lambda t:t[1], reverse = True) :
 		if item >= mincount :
-			yield [key, dico_occ[key]]
+			yield (key, dico_occ[key])
 
 
 
@@ -146,33 +146,21 @@ def abundance_greedy_clustering(amplicon_file, minseqlen, mincount, chunk_size, 
 	#print(sequence)
 	dico_otu = {}
 	#otu = sequence[0][0]
-	for seq in sequence :
-		otu = sequence[seq][seq]	
-		al = nw.global_align(otu, sequence[seq], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
+	for seq in range(len(sequence)-1) :
+		#print(sequence[seq][1])
+		otu = sequence[seq][0]
+		#print(otu)
+		al = nw.global_align(otu, sequence[seq+1][0], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
 		#pcent = get_identity(al)
 
 		pcent = get_identity(al)
-		if (pcent < 0.97) :
-			dico_otu = dico_otu[seq]
+		#print(pcent)
+		if (pcent < 97) :
+			dico_otu[sequence[seq]] = sequence[seq][1]
 		else :
 			continue
-
-		
-
+	print(dico_otu)
 	yield dico_otu
-
-
-
-'''
-		if (pcent > 0.97) :
-			if otu not in dico_otu :
-				dico_otu[otu] = 1
-			else :
-				dico_otu[otu] += 1
-
-		yield [dico_otu, dico_otu[seq]]
-
-'''
 
 
 
