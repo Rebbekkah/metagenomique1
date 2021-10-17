@@ -148,18 +148,21 @@ def abundance_greedy_clustering(amplicon_file, minseqlen, mincount, chunk_size, 
 	otu_list = [sequence[0]]
 	#print(otu)
 	#otu = sequence[0][0]
+
 	for i in range(1,len(sequence)) :
 		#print(sequence[seq][1])
 		#otu.append(sequence[seq][0])
 		#print(otu)
 		for seq_otu in otu_list :
+			#print(seq_otu)
 			#print(seq_otu[0])
 			#print(sequence[i][0])
-			al = nw.global_align(seq_otu[0], sequence[i][0], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
-			pcent = get_identity(al)
+			alignement = nw.global_align(seq_otu[0][0], sequence[i][0], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
+			pcent = get_identity(alignement)
 			if (pcent < 97) :
 				otu_list.append(sequence[i])
-	print(otu_list)
+	#print(otu_list)
+	return otu_list
 
 
 
@@ -168,7 +171,7 @@ def fill(text, width=80):
 	return os.linesep.join(text[i:i+width] for i in range(0, len(text), width))
 
 def write_OTU(OTU_list, output_file):
-	pass
+	filling = fill(OTU_list)
 
 #==============================================================
 # Main program
@@ -188,10 +191,13 @@ def main():
 	#print(derep)
 	#for i in derep :
 	#	print(i)
+	
+	
 	abundance = abundance_greedy_clustering(args.amplicon_file, args.minseqlen, args.mincount, args.chunk_size, args.kmer_size)
 	for i in abundance :
 		print(i)
-
+	
+	print("machin")
 
 	# Votre programme ici
 
