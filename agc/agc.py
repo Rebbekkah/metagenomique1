@@ -23,13 +23,13 @@ from collections import Counter
 # ftp://ftp.ncbi.nih.gov/blast/matrices/
 import nwalign3 as nw
 
-__author__ = "Your Name"
+__author__ = "Goulancourt Rebecca & Théo Jamay"
 __copyright__ = "Universite Paris Diderot"
-__credits__ = ["Your Name"]
+__credits__ = ["Goulancourt Rebecca & Théo Jamay"]
 __license__ = "GPL"
 __version__ = "1.0.0"
-__maintainer__ = "Your Name"
-__email__ = "your@email.fr"
+__maintainer__ = "Goulancourt Rebecca & Théo Jamay"
+__email__ = "rgoulancourt@yahoo.com & jamay.theo@gmail.com"
 __status__ = "Developpement"
 
 
@@ -99,7 +99,7 @@ def dereplication_fulllength(amplicon_file, minseqlen, mincount):
 
 	for key,item in sorted(dico_occ.items(), key = lambda t:t[1], reverse = True) :
 		if item >= mincount :
-			yield [key, dico_occ[key]]
+			yield (key, dico_occ[key])
 
 
 
@@ -143,21 +143,23 @@ def chimera_removal(amplicon_file, minseqlen, mincount, chunk_size, kmer_size):
 
 def abundance_greedy_clustering(amplicon_file, minseqlen, mincount, chunk_size, kmer_size):
 	sequence = list(dereplication_fulllength(amplicon_file, minseqlen, mincount))
-	dico_otu = {}
-	for seq in sequence :
-		otu = sequence[seq][seq]
-		al = nw.global_align(otu, sequence[seq], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
-		pcent = get_identity(al)
-
-		if (pcent > 0.97) :
-			if otu not in dico_otu :
-				dico_otu[otu] = 1
-			else :
-				dico_otu[otu] += 1
-
-		yield [dico_otu, dico_otu[seq]]
-
-	
+	#print(sequence)
+	#dico_otu = {}
+	otu_list = [sequence[0]]
+	#print(otu)
+	#otu = sequence[0][0]
+	for i in range(1,len(sequence)) :
+		#print(sequence[seq][1])
+		#otu.append(sequence[seq][0])
+		#print(otu)
+		for seq_otu in otu_list :
+			#print(seq_otu[0])
+			#print(sequence[i][0])
+			al = nw.global_align(seq_otu[0], sequence[i][0], gap_open = -1, gap_extend = -1, matrix = os.path.abspath(os.path.join(os.path.dirname(__file__),"MATCH")))
+			pcent = get_identity(al)
+			if (pcent < 97) :
+				otu_list.append(sequence[i])
+	print(otu_list)
 
 
 
